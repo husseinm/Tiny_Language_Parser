@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <regex>
 
 class TinyLexicalAnalyzer
 {
@@ -11,6 +12,8 @@ public:
   TinyLexicalAnalyzer();
   ~TinyLexicalAnalyzer();
 
+  // The token order listed here, not in the constructor,
+  //  is what determines parsing matching order
   enum Token
   {
     Program,
@@ -65,19 +68,34 @@ public:
     Plus,
     Minus,
     Multiply,
-    Divide
+    Divide,
+    Identifier,
+    Number,
+    Character,
+    String
   };
 
-  std::vector<Token> analyzeProgram(std::istream &tinyProgram);
+  void analyzeProgram(std::istream &tinyProgram);
+
+  std::vector<Token> getTokens();
+  std::map<size_t, std::string> getValues();
+
   std::string convertTokenToString(Token token);
 
 private:
   Token convertStringToToken(std::string string);
 
-  std::map<Token, std::string> tokenRepresentationMap;
-  /*
-  const std::vector<std::string> tokenRepresentations = {"\n", "program", "var", "const", "type", "function", "return", "begin", "end", ":=:", ":=", "output", "if", "then", "else", "while", "do", "case", "of", "..", "otherwise", "repeat", "for", "until", "loop", "pool", "exit", "<=", "<>", "<", ">=", ">", "=", "mod", "and", "or", "not", "read", "succ", "pred", "chr", "ord", "eof", "{", ":", ";", ".", ",", "(", ")", "+", "-", "*", "/"};
-  */
+  bool handleCharsAndStrings(std::istream &tinyProgram, char nextChar);
+  bool handleKeywords(std::istream &tinyProgram, char nextChar);
+  bool handleNumbersAndIdentifiers(std::istream &tinyProgram, char nextChar);
+
+  std::vector<Token> _tokens;
+  std::map<Token, std::string> _tokenRepresentationMap;
+  std::map<size_t, std::string> _valuesMap;
+  size_t _maxLookupSize;
+  bool _insideCommentBlockType1;
+  bool _insideCommentBlockType2;
+  int _lineNumber;
 };
 
 #endif

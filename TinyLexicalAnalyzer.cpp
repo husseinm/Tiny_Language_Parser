@@ -4,80 +4,112 @@
 
 #include "./include/TinyLexicalAnalyzer.h"
 
-#define MaxLookupSize 10
-
-TinyLexicalAnalyzer::TinyLexicalAnalyzer()
+TinyLexicalAnalyzer::TinyLexicalAnalyzer() : _insideCommentBlockType1(false), _insideCommentBlockType2(false),
+                                             _lineNumber(1)
 {
-  tokenRepresentationMap = std::map<TinyLexicalAnalyzer::Token, std::string>();
-  tokenRepresentationMap[Token::Program] = "program";
-  tokenRepresentationMap[Token::Variable] = "var";
-  tokenRepresentationMap[Token::Constant] = "const";
-  tokenRepresentationMap[Token::Type] = "type";
-  tokenRepresentationMap[Token::Function] = "function";
-  tokenRepresentationMap[Token::Return] = "return";
-  tokenRepresentationMap[Token::Begin] = "begin";
-  tokenRepresentationMap[Token::End] = "end";
-  tokenRepresentationMap[Token::Swap] = ":=:";
-  tokenRepresentationMap[Token::Assignment] = ":=";
-  tokenRepresentationMap[Token::Integer] = "integer";
-  tokenRepresentationMap[Token::Output] = "output";
-  tokenRepresentationMap[Token::If] = "if";
-  tokenRepresentationMap[Token::Then] = "then";
-  tokenRepresentationMap[Token::Else] = "else";
-  tokenRepresentationMap[Token::While] = "while";
-  tokenRepresentationMap[Token::Do] = "do";
-  tokenRepresentationMap[Token::Case] = "case";
-  tokenRepresentationMap[Token::Of] = "of";
-  tokenRepresentationMap[Token::Elipses] = "..";
-  tokenRepresentationMap[Token::Otherwise] = "otherwise";
-  tokenRepresentationMap[Token::Repeat] = "repeat";
-  tokenRepresentationMap[Token::For] = "for";
-  tokenRepresentationMap[Token::Until] = "until";
-  tokenRepresentationMap[Token::Loop] = "loop";
-  tokenRepresentationMap[Token::Pool] = "pool";
-  tokenRepresentationMap[Token::Exit] = "exit";
-  tokenRepresentationMap[Token::LE] = "<=";
-  tokenRepresentationMap[Token::NE] = "<>";
-  tokenRepresentationMap[Token::LT] = "<";
-  tokenRepresentationMap[Token::GE] = ">=";
-  tokenRepresentationMap[Token::GT] = ">";
-  tokenRepresentationMap[Token::Eq] = "=";
-  tokenRepresentationMap[Token::Mod] = "mod";
-  tokenRepresentationMap[Token::And] = "and";
-  tokenRepresentationMap[Token::Or] = "or";
-  tokenRepresentationMap[Token::Not] = "not";
-  tokenRepresentationMap[Token::Read] = "read";
-  tokenRepresentationMap[Token::Successor] = "succ";
-  tokenRepresentationMap[Token::Predecessor] = "pred";
-  tokenRepresentationMap[Token::CharFun] = "chr";
-  tokenRepresentationMap[Token::OrdFun] = "ord";
-  tokenRepresentationMap[Token::Eof] = "eof";
-  tokenRepresentationMap[Token::Colon] = ":";
-  tokenRepresentationMap[Token::Semicolon] = ";";
-  tokenRepresentationMap[Token::Dot] = ".";
-  tokenRepresentationMap[Token::Comma] = ",";
-  tokenRepresentationMap[Token::OpenBracket] = "(";
-  tokenRepresentationMap[Token::CloseBracket] = ")";
-  tokenRepresentationMap[Token::Plus] = "+";
-  tokenRepresentationMap[Token::Minus] = "-";
-  tokenRepresentationMap[Token::Multiply] = "*";
-  tokenRepresentationMap[Token::Divide] = "/";
+  _tokens = std::vector<Token>();
+  _valuesMap = std::map<size_t, std::string>();
+  _tokenRepresentationMap = std::map<TinyLexicalAnalyzer::Token, std::string>();
+
+  _tokenRepresentationMap[Token::Program] = "program";
+  _tokenRepresentationMap[Token::Variable] = "var";
+  _tokenRepresentationMap[Token::Constant] = "const";
+  _tokenRepresentationMap[Token::Type] = "type";
+  _tokenRepresentationMap[Token::Function] = "function";
+  _tokenRepresentationMap[Token::Return] = "return";
+  _tokenRepresentationMap[Token::Begin] = "begin";
+  _tokenRepresentationMap[Token::End] = "end";
+  _tokenRepresentationMap[Token::Swap] = ":=:";
+  _tokenRepresentationMap[Token::Assignment] = ":=";
+  _tokenRepresentationMap[Token::Integer] = "integer";
+  _tokenRepresentationMap[Token::Output] = "output";
+  _tokenRepresentationMap[Token::If] = "if";
+  _tokenRepresentationMap[Token::Then] = "then";
+  _tokenRepresentationMap[Token::Else] = "else";
+  _tokenRepresentationMap[Token::While] = "while";
+  _tokenRepresentationMap[Token::Do] = "do";
+  _tokenRepresentationMap[Token::Case] = "case";
+  _tokenRepresentationMap[Token::Of] = "of";
+  _tokenRepresentationMap[Token::Elipses] = "..";
+  _tokenRepresentationMap[Token::Otherwise] = "otherwise";
+  _tokenRepresentationMap[Token::Repeat] = "repeat";
+  _tokenRepresentationMap[Token::For] = "for";
+  _tokenRepresentationMap[Token::Until] = "until";
+  _tokenRepresentationMap[Token::Loop] = "loop";
+  _tokenRepresentationMap[Token::Pool] = "pool";
+  _tokenRepresentationMap[Token::Exit] = "exit";
+  _tokenRepresentationMap[Token::LE] = "<=";
+  _tokenRepresentationMap[Token::NE] = "<>";
+  _tokenRepresentationMap[Token::LT] = "<";
+  _tokenRepresentationMap[Token::GE] = ">=";
+  _tokenRepresentationMap[Token::GT] = ">";
+  _tokenRepresentationMap[Token::Eq] = "=";
+  _tokenRepresentationMap[Token::Mod] = "mod";
+  _tokenRepresentationMap[Token::And] = "and";
+  _tokenRepresentationMap[Token::Or] = "or";
+  _tokenRepresentationMap[Token::Not] = "not";
+  _tokenRepresentationMap[Token::Read] = "read";
+  _tokenRepresentationMap[Token::Successor] = "succ";
+  _tokenRepresentationMap[Token::Predecessor] = "pred";
+  _tokenRepresentationMap[Token::CharFun] = "chr";
+  _tokenRepresentationMap[Token::OrdFun] = "ord";
+  _tokenRepresentationMap[Token::Eof] = "eof";
+  _tokenRepresentationMap[Token::Colon] = ":";
+  _tokenRepresentationMap[Token::Semicolon] = ";";
+  _tokenRepresentationMap[Token::Dot] = ".";
+  _tokenRepresentationMap[Token::Comma] = ",";
+  _tokenRepresentationMap[Token::OpenBracket] = "(";
+  _tokenRepresentationMap[Token::CloseBracket] = ")";
+  _tokenRepresentationMap[Token::Plus] = "+";
+  _tokenRepresentationMap[Token::Minus] = "-";
+  _tokenRepresentationMap[Token::Multiply] = "*";
+  _tokenRepresentationMap[Token::Divide] = "/";
+
+  // Dynamically calculate the longest token
+  auto longestToken = std::max_element(this->_tokenRepresentationMap.begin(),
+                                       this->_tokenRepresentationMap.end(),
+                                       [](std::pair<Token, std::string> a, std::pair<Token, std::string> b) {
+                                         return a.second.length() < b.second.length();
+                                       });
+  this->_maxLookupSize = longestToken->second.length();
 }
 
 TinyLexicalAnalyzer::~TinyLexicalAnalyzer()
 {
 }
 
+std::map<size_t, std::string> TinyLexicalAnalyzer::getValues()
+{
+  return this->_valuesMap;
+}
+
+std::vector<TinyLexicalAnalyzer::Token> TinyLexicalAnalyzer::getTokens()
+{
+  return this->_tokens;
+}
+
 std::string TinyLexicalAnalyzer::convertTokenToString(TinyLexicalAnalyzer::Token token)
 {
-  return tokenRepresentationMap.at(token);
+  switch (token)
+  {
+  case Token::Character:
+    return "<char>";
+  case Token::String:
+    return "<string>";
+  case Token::Number:
+    return "<number>";
+  case Token::Identifier:
+    return "<identifier>";
+  default:
+    return _tokenRepresentationMap.at(token);
+  }
 }
 
 TinyLexicalAnalyzer::Token TinyLexicalAnalyzer::convertStringToToken(std::string string)
 {
   // Abusing the standards, yay...
   // https://tinyurl.com/y7m4c9mf -> Shortened SO Link
-  for (auto it = this->tokenRepresentationMap.rbegin(); it != this->tokenRepresentationMap.rend(); ++it)
+  for (auto it = this->_tokenRepresentationMap.begin(); it != this->_tokenRepresentationMap.end(); ++it)
   {
     if (it->second == string)
     {
@@ -88,160 +120,197 @@ TinyLexicalAnalyzer::Token TinyLexicalAnalyzer::convertStringToToken(std::string
   throw std::out_of_range("Not Found");
 }
 
-// TODO: Add Declaration Tables
-// TODO: Add Error Checking
-// TODO: Dynamically calculate the MaxLookahead
-std::vector<TinyLexicalAnalyzer::Token> TinyLexicalAnalyzer::analyzeProgram(
-    std::istream &tinyProgram)
+// TODO: Do this with Regexes instead for cleanness/versatility
+void TinyLexicalAnalyzer::analyzeProgram(std::istream &tinyProgram)
 {
-  std::vector<TinyLexicalAnalyzer::Token> tokens = std::vector<TinyLexicalAnalyzer::Token>();
-  std::vector<char> textBuffer = std::vector<char>();
-  bool insideCommentBlockType1 = false;
-  bool insideCommentBlockType2 = false;
-  int lineNumber = 1;
-
   while (!tinyProgram.eof())
   {
-    // Grab the next char and check if the new buffer matches a token, if not, catch the exception
-    //   and retry on next loop iteration with another char.
     char nextChar = tinyProgram.get();
 
-    // Skip processing on New Lines OR whitespace
-    if (nextChar == '\n')
+    // Skip processing on New Lines/whitespace OR within comments = Highest Precedence
+    switch (nextChar)
     {
-      insideCommentBlockType1 = false;
-      lineNumber++;
-    }
-
-    // Skip everything in between comments
-    if (nextChar == '{')
-    {
-      insideCommentBlockType2 = true;
-    }
-    else if (nextChar == '}')
-    {
-      insideCommentBlockType2 = false;
+    case '\n':
+      _insideCommentBlockType1 = false;
+      _lineNumber++;
+      continue;
+    case '{':
+      _insideCommentBlockType2 = true;
+      continue;
+    case '}':
+      _insideCommentBlockType2 = false;
+      continue;
+    case '#':
+      _insideCommentBlockType1 = true;
       continue;
     }
-    else if (nextChar == '#')
+
+    // If not whitespace OR comment, then let's actually process with lookahead.
+    if (!isspace(nextChar) && !_insideCommentBlockType1 && !_insideCommentBlockType2)
     {
-      insideCommentBlockType1 = true;
-    }
+      // Record current state for resets/rewinding
+      const int initialLocation = tinyProgram.tellg();
 
-    if (!isspace(nextChar) && !insideCommentBlockType1 && !insideCommentBlockType2)
-    {
-      textBuffer.push_back(nextChar);
-      const int preTokenLocationInTinyProgram = tinyProgram.tellg();
-      const char ogNextChar = nextChar;
-
-      // Check for Char
-      if (nextChar == '\'')
-      {
-        textBuffer.clear();
-        textBuffer.push_back(tinyProgram.get());
-        nextChar = tinyProgram.get();
-        if (nextChar != '\'')
-        {
-          // TODO: Error out we have a problem
-        }
-
-        // TODO: Store this somewhere minus last char...
-
-        textBuffer.clear();
+      // Recognition Hierarchy = Char -> String -> Keyword -> Number -> Identifier
+      if (handleCharsAndStrings(tinyProgram, nextChar)) // is Atomic, no need to unwind if no token
         continue;
-      }
 
-      // Check for String
-      if (nextChar == '\"')
-      {
-        textBuffer.clear();
-
-        while (nextChar != '\"')
-        {
-          char nextChar = tinyProgram.get();
-          textBuffer.push_back(nextChar);
-        }
-
-        // TODO: Store this somewhere minus last char...
-
-        textBuffer.clear();
-        tinyProgram.unget();
+      if (handleKeywords(tinyProgram, nextChar)) // Always winds forward, if no token unwind
         continue;
-      }
-
-      for (int i = 0; i <= MaxLookupSize; i++)
+      else
       {
-        try
-        {
-          auto token = convertStringToToken(std::string(textBuffer.begin(), textBuffer.end()));
-
-          tokens.push_back(token);
-          textBuffer.clear();
-          break;
-        }
-        catch (const std::out_of_range &e)
-        {
-        }
-
-        nextChar = tinyProgram.get();
-        textBuffer.push_back(nextChar);
+        tinyProgram.clear();
+        tinyProgram.seekg(initialLocation);
       }
 
-      // Handle a lookup that is over the max char token lookahead size & fails to match any token
-      if (textBuffer.size() >= MaxLookupSize)
+      if (handleNumbersAndIdentifiers(tinyProgram, nextChar)) // Non-Atomic, need to unwind
+        continue;
+      else
       {
-        // Reset initial seek to try again for number | identifier
-        textBuffer.clear();
-        textBuffer.push_back(ogNextChar);
-        tinyProgram.seekg(preTokenLocationInTinyProgram);
-
-        if (isdigit(ogNextChar))
-        {
-          // If starts with a number, must be a number...
-          nextChar = ogNextChar;
-
-          while (isdigit(nextChar))
-          {
-            nextChar = tinyProgram.get();
-            textBuffer.push_back(nextChar);
-          }
-
-          // TODO: Store this minus last char...
-          tinyProgram.unget();
-          textBuffer.clear();
-        }
-        else if (isalpha(ogNextChar) || ogNextChar == '_')
-        {
-          // If starts with a letter or underscore, must be an identifier...
-          nextChar = ogNextChar;
-
-          while (isalnum(nextChar) || nextChar == '_')
-          {
-            nextChar = tinyProgram.get();
-            textBuffer.push_back(nextChar);
-          }
-
-          // TODO: Store this minus last char...
-          tinyProgram.unget();
-          textBuffer.clear();
-        }
-        else if (ogNextChar == EOF)
-        {
-          return tokens;
-        }
-        else
-        {
-          char errorBuffer[115];
-
-          sprintf(errorBuffer, "Lexical Analyzer failed to translate token starting with \'%c\' on line %d into a token"
-                               " or identifier.",
-                  ogNextChar, lineNumber);
-
-          throw std::invalid_argument(errorBuffer);
-        }
+        tinyProgram.clear();
+        tinyProgram.seekg(initialLocation);
       }
+
+      if (nextChar == EOF)
+        return;
+
+      char errorBuffer[115];
+      sprintf(errorBuffer, "Lexical Analyzer failed to translate string starting with \'%c\'"
+                           " on line %d into a token or identifier.",
+              nextChar, _lineNumber);
+      throw std::invalid_argument(errorBuffer);
     }
   }
 
-  return tokens;
+  return;
+}
+
+bool TinyLexicalAnalyzer::handleCharsAndStrings(std::istream &tinyProgram, char nextChar)
+{
+  std::string textBuffer;
+
+  // Check for Character
+  if (nextChar == '\'')
+  {
+    textBuffer.push_back(tinyProgram.get());
+    nextChar = tinyProgram.get();
+
+    _tokens.push_back(Token::Character);
+
+    if (textBuffer == "\'")
+    {
+      this->_valuesMap[_tokens.size() - 1] = "";
+      return true;
+    }
+    else
+      this->_valuesMap[_tokens.size() - 1] = std::string(textBuffer.begin(), textBuffer.end());
+
+    if (nextChar != '\'')
+    {
+      char errorBuffer[115];
+
+      sprintf(errorBuffer, "Lexical Analyzer failed to parse character token on line %d into a token"
+                           " or identifier.",
+              _lineNumber);
+
+      throw std::invalid_argument(errorBuffer);
+    }
+
+    return true;
+  }
+
+  // Check for String
+  if (nextChar == '\"')
+  {
+    do
+    {
+      nextChar = tinyProgram.get();
+      textBuffer.push_back(nextChar);
+
+      if (nextChar == EOF)
+      {
+        char errorBuffer[115];
+        sprintf(errorBuffer, "Reached EOF while reading a string starting on line %d", _lineNumber);
+        throw std::invalid_argument(errorBuffer);
+      }
+    } while (nextChar != '\"');
+
+    _tokens.push_back(Token::String);
+
+    if (textBuffer == "\"")
+      this->_valuesMap[_tokens.size() - 1] = "";
+    else
+      this->_valuesMap[_tokens.size() - 1] = std::string(textBuffer.begin(), textBuffer.end() - 1);
+
+    return true;
+  }
+
+  return false;
+}
+
+bool TinyLexicalAnalyzer::handleKeywords(std::istream &tinyProgram, char nextChar)
+{
+  // Check for language keyword
+  std::string textBuffer;
+  textBuffer.push_back(nextChar);
+
+  for (size_t i = 0; i < this->_maxLookupSize; i++)
+    textBuffer.push_back(tinyProgram.get());
+
+  while (textBuffer.length() > 0)
+  {
+    try
+    {
+      Token token = convertStringToToken(textBuffer);
+      _tokens.push_back(token);
+      return true;
+    }
+    catch (const std::out_of_range &e)
+    {
+    }
+
+    tinyProgram.unget();
+    textBuffer.pop_back();
+  }
+
+  return false;
+}
+
+bool TinyLexicalAnalyzer::handleNumbersAndIdentifiers(std::istream &tinyProgram, char nextChar)
+{
+  std::string textBuffer;
+  textBuffer.push_back(nextChar);
+
+  if (isdigit(nextChar))
+  {
+    // If starts with a number, must be a number...
+    while (isdigit(nextChar))
+    {
+      nextChar = tinyProgram.get();
+      textBuffer.push_back(nextChar);
+    }
+
+    _tokens.push_back(Token::Number);
+    this->_valuesMap[_tokens.size() - 1] = std::string(textBuffer.begin(), textBuffer.end() - 1);
+
+    tinyProgram.unget();
+    return true;
+  }
+  else if (isalpha(nextChar) || nextChar == '_')
+  {
+    // If starts with a letter or underscore, must be an identifier...
+    while (isalnum(nextChar) || nextChar == '_')
+    {
+      nextChar = tinyProgram.get();
+      textBuffer.push_back(nextChar);
+    }
+
+    _tokens.push_back(Token::Identifier);
+    this->_valuesMap[_tokens.size() - 1] = std::string(textBuffer.begin(), textBuffer.end() - 1);
+
+    tinyProgram.unget();
+    return true;
+  }
+
+  return false;
 }

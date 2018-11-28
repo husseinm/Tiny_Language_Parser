@@ -26,5 +26,4 @@ begin
 	read(i);
 	d:=Factor ( i )
     until i <= 0
-
 end factors.
