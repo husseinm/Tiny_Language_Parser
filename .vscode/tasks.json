@@ -1,0 +1,29 @@
+{
+  "version": "0.1.0",
+  "command": "bash",
+  "args": ["-c"],
+  "isShellCommand": true,
+  "showOutput": "always",
+  "suppressTaskName": true,
+  "options": {
+    "cwd": "${workspaceRoot}"
+  },
+  "tasks": [
+    {
+      "taskName": "build",
+      "args": [
+        "make"
+      ],
+      "isBuildCommand": true,
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "taskName": "clean",
+      "args": [
+        "make clean"
+      ]
+    }
+  ]
+}
