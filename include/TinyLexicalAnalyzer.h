@@ -90,6 +90,7 @@ private:
   bool handleNumbersAndIdentifiers(std::istream &tinyProgram, char nextChar);
 
   std::vector<Token> _tokens;
+  // TODO: Replace with unordered_map
   std::map<Token, std::string> _tokenRepresentationMap;
   std::map<size_t, std::string> _valuesMap;
   size_t _maxLookupSize;

@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "./include/TinyLexicalAnalyzer.h"
+#include "./include/TinyParser.h"
 
 int main(int argc, char **argv)
 {
@@ -73,9 +74,18 @@ int main(int argc, char **argv)
         std::cout << std::endl;
       }
     }
+
+    return 0;
   }
 
   // Parsing
+  TinyParser programParser;
+  programParser.parseProgram(lexTokens, tokenValues);
+
+  if (astFlag)
+  {
+    programParser.printAst();
+  }
 
   return 0;
 }
