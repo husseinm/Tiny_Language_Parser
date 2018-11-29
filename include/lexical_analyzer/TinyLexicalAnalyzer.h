@@ -25,7 +25,6 @@ public:
     End,
     Swap,
     Assignment,
-    Integer,
     Output,
     If,
     Then,
@@ -79,7 +78,7 @@ public:
   std::queue<TinyLexicalAnalyzer::Token> getTokens();
   std::map<size_t, std::string> getValues();
 
-  std::string convertTokenToString(Token token);
+  static std::string convertTokenToString(Token token);
 
 private:
   Token convertStringToToken(std::string string);

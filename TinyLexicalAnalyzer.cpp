@@ -26,7 +26,6 @@ TinyLexicalAnalyzer::TinyLexicalAnalyzer() : _insideCommentBlockType1(false), _i
     _tokenRepresentationMap[Token::End] = "end";
     _tokenRepresentationMap[Token::Swap] = ":=:";
     _tokenRepresentationMap[Token::Assignment] = ":=";
-    _tokenRepresentationMap[Token::Integer] = "integer";
     _tokenRepresentationMap[Token::Output] = "output";
     _tokenRepresentationMap[Token::If] = "if";
     _tokenRepresentationMap[Token::Then] = "then";

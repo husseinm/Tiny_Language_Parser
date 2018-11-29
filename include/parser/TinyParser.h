@@ -21,6 +21,8 @@ private:
   std::queue<TinyLexicalAnalyzer::Token> *tokens;
   std::map<size_t, std::string> *values;
 
+  void assertNextToken(TinyLexicalAnalyzer::Token expected);
+
   void Tiny();
   void Consts();
   void Const();
