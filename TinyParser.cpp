@@ -1,31 +1,39 @@
-#include "./include/TinyParser.h"
+#include <iostream>
+
+#include "./include/parser/TinyParser.h"
 
 TinyParser::TinyParser()
 {
   this->_ast = TreeNode();
+
+  TreeNode subChild1 = TreeNode();
+  subChild1.type = TreeNode::Type::Assignment;
+
+  TreeNode child1 = TreeNode();
+  child1.type = TreeNode::Type::And;
+  child1.children.push_back(subChild1);
+
+  this->_ast.type = TreeNode::Type::Program;
+  this->_ast.children.push_back(child1);
+  this->_ast.children.push_back(child1);
 }
 
 TinyParser::~TinyParser()
 {
 }
 
-void TinyParser::parseProgram(std::vector<TinyLexicalAnalyzer::Token> tokens,
-                              std::map<size_t, std::string> values)
-{
-}
-
-TinyParser::TreeNode TinyParser::getAst()
+TreeNode TinyParser::getAst()
 {
   return this->_ast;
 }
 
-void TinyParser::printAst()
+void TinyParser::parseProgram(std::queue<TinyLexicalAnalyzer::Token> tokens,
+                              std::map<size_t, std::string> values)
 {
-  printAstLayer(0);
-}
+  this->tokens = &tokens;
+  this->values = &values;
 
-void TinyParser::printAstLayer(int layer)
-{
+  Tiny();
 }
 
 void TinyParser::Tiny(){};
@@ -38,7 +46,7 @@ void TinyParser::ConstValue(){};
 
 void TinyParser::Types(){};
 
-void TinyParser::Type(){};
+void TinyParser::TypeNode(){};
 
 void TinyParser::LitList(){};
 
@@ -68,7 +76,7 @@ void TinyParser::CaseExpression(){};
 
 void TinyParser::OtherwiseClause(){};
 
-void TinyParser::Assignment(){};
+void TinyParser::AssignmentNode(){};
 
 void TinyParser::ForStat(){};
 

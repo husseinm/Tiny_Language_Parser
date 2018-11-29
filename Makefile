@@ -1,13 +1,13 @@
-IDIR =../include
+IDIR =./include
 CPPC=g++
 CFLAGS=-I$(IDIR) -std=c++11 -lstdc++ -Wall
 
 LIBS=-lm
 
-_DEPS = nodes.h TinyLexicalAnalyzer.h TinyParser.h tokens.h
+_DEPS = TreeNode.h lexical_analyzer/TinyLexicalAnalyzer.h parser/TinyParser.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-OBJ = main.cpp TinyLexicalAnalyzer.cpp TinyParser.cpp
+OBJ = main.cpp TinyLexicalAnalyzer.cpp TinyParser.cpp TreeNode.cpp
 
 
 $(ODIR)/%.o: %.c $(DEPS)

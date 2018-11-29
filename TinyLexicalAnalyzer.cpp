@@ -2,68 +2,76 @@
 #include <istream>
 #include <exception>
 
-#include "./include/TinyLexicalAnalyzer.h"
+#include "./include/lexical_analyzer/TinyLexicalAnalyzer.h"
+
+std::map<TinyLexicalAnalyzer::Token, std::string> TinyLexicalAnalyzer::_tokenRepresentationMap =
+    std::map<TinyLexicalAnalyzer::Token, std::string>();
+bool TinyLexicalAnalyzer::isInitialized = false;
 
 TinyLexicalAnalyzer::TinyLexicalAnalyzer() : _insideCommentBlockType1(false), _insideCommentBlockType2(false),
                                              _lineNumber(1)
 {
-  _tokens = std::vector<Token>();
+  _tokens = std::queue<Token>();
   _valuesMap = std::map<size_t, std::string>();
-  _tokenRepresentationMap = std::map<TinyLexicalAnalyzer::Token, std::string>();
 
-  _tokenRepresentationMap[Token::Program] = "program";
-  _tokenRepresentationMap[Token::Variable] = "var";
-  _tokenRepresentationMap[Token::Constant] = "const";
-  _tokenRepresentationMap[Token::Type] = "type";
-  _tokenRepresentationMap[Token::Function] = "function";
-  _tokenRepresentationMap[Token::Return] = "return";
-  _tokenRepresentationMap[Token::Begin] = "begin";
-  _tokenRepresentationMap[Token::End] = "end";
-  _tokenRepresentationMap[Token::Swap] = ":=:";
-  _tokenRepresentationMap[Token::Assignment] = ":=";
-  _tokenRepresentationMap[Token::Integer] = "integer";
-  _tokenRepresentationMap[Token::Output] = "output";
-  _tokenRepresentationMap[Token::If] = "if";
-  _tokenRepresentationMap[Token::Then] = "then";
-  _tokenRepresentationMap[Token::Else] = "else";
-  _tokenRepresentationMap[Token::While] = "while";
-  _tokenRepresentationMap[Token::Do] = "do";
-  _tokenRepresentationMap[Token::Case] = "case";
-  _tokenRepresentationMap[Token::Of] = "of";
-  _tokenRepresentationMap[Token::Elipses] = "..";
-  _tokenRepresentationMap[Token::Otherwise] = "otherwise";
-  _tokenRepresentationMap[Token::Repeat] = "repeat";
-  _tokenRepresentationMap[Token::For] = "for";
-  _tokenRepresentationMap[Token::Until] = "until";
-  _tokenRepresentationMap[Token::Loop] = "loop";
-  _tokenRepresentationMap[Token::Pool] = "pool";
-  _tokenRepresentationMap[Token::Exit] = "exit";
-  _tokenRepresentationMap[Token::LE] = "<=";
-  _tokenRepresentationMap[Token::NE] = "<>";
-  _tokenRepresentationMap[Token::LT] = "<";
-  _tokenRepresentationMap[Token::GE] = ">=";
-  _tokenRepresentationMap[Token::GT] = ">";
-  _tokenRepresentationMap[Token::Eq] = "=";
-  _tokenRepresentationMap[Token::Mod] = "mod";
-  _tokenRepresentationMap[Token::And] = "and";
-  _tokenRepresentationMap[Token::Or] = "or";
-  _tokenRepresentationMap[Token::Not] = "not";
-  _tokenRepresentationMap[Token::Read] = "read";
-  _tokenRepresentationMap[Token::Successor] = "succ";
-  _tokenRepresentationMap[Token::Predecessor] = "pred";
-  _tokenRepresentationMap[Token::CharFun] = "chr";
-  _tokenRepresentationMap[Token::OrdFun] = "ord";
-  _tokenRepresentationMap[Token::Eof] = "eof";
-  _tokenRepresentationMap[Token::Colon] = ":";
-  _tokenRepresentationMap[Token::Semicolon] = ";";
-  _tokenRepresentationMap[Token::Dot] = ".";
-  _tokenRepresentationMap[Token::Comma] = ",";
-  _tokenRepresentationMap[Token::OpenBracket] = "(";
-  _tokenRepresentationMap[Token::CloseBracket] = ")";
-  _tokenRepresentationMap[Token::Plus] = "+";
-  _tokenRepresentationMap[Token::Minus] = "-";
-  _tokenRepresentationMap[Token::Multiply] = "*";
-  _tokenRepresentationMap[Token::Divide] = "/";
+  if (!isInitialized)
+  {
+    _tokenRepresentationMap[Token::Program] = "program";
+    _tokenRepresentationMap[Token::Variable] = "var";
+    _tokenRepresentationMap[Token::Constant] = "const";
+    _tokenRepresentationMap[Token::Type] = "type";
+    _tokenRepresentationMap[Token::Function] = "function";
+    _tokenRepresentationMap[Token::Return] = "return";
+    _tokenRepresentationMap[Token::Begin] = "begin";
+    _tokenRepresentationMap[Token::End] = "end";
+    _tokenRepresentationMap[Token::Swap] = ":=:";
+    _tokenRepresentationMap[Token::Assignment] = ":=";
+    _tokenRepresentationMap[Token::Integer] = "integer";
+    _tokenRepresentationMap[Token::Output] = "output";
+    _tokenRepresentationMap[Token::If] = "if";
+    _tokenRepresentationMap[Token::Then] = "then";
+    _tokenRepresentationMap[Token::Else] = "else";
+    _tokenRepresentationMap[Token::While] = "while";
+    _tokenRepresentationMap[Token::Do] = "do";
+    _tokenRepresentationMap[Token::Case] = "case";
+    _tokenRepresentationMap[Token::Of] = "of";
+    _tokenRepresentationMap[Token::Elipses] = "..";
+    _tokenRepresentationMap[Token::Otherwise] = "otherwise";
+    _tokenRepresentationMap[Token::Repeat] = "repeat";
+    _tokenRepresentationMap[Token::For] = "for";
+    _tokenRepresentationMap[Token::Until] = "until";
+    _tokenRepresentationMap[Token::Loop] = "loop";
+    _tokenRepresentationMap[Token::Pool] = "pool";
+    _tokenRepresentationMap[Token::Exit] = "exit";
+    _tokenRepresentationMap[Token::LE] = "<=";
+    _tokenRepresentationMap[Token::NE] = "<>";
+    _tokenRepresentationMap[Token::LT] = "<";
+    _tokenRepresentationMap[Token::GE] = ">=";
+    _tokenRepresentationMap[Token::GT] = ">";
+    _tokenRepresentationMap[Token::Eq] = "=";
+    _tokenRepresentationMap[Token::Mod] = "mod";
+    _tokenRepresentationMap[Token::And] = "and";
+    _tokenRepresentationMap[Token::Or] = "or";
+    _tokenRepresentationMap[Token::Not] = "not";
+    _tokenRepresentationMap[Token::Read] = "read";
+    _tokenRepresentationMap[Token::Successor] = "succ";
+    _tokenRepresentationMap[Token::Predecessor] = "pred";
+    _tokenRepresentationMap[Token::CharFun] = "chr";
+    _tokenRepresentationMap[Token::OrdFun] = "ord";
+    _tokenRepresentationMap[Token::Eof] = "eof";
+    _tokenRepresentationMap[Token::Colon] = ":";
+    _tokenRepresentationMap[Token::Semicolon] = ";";
+    _tokenRepresentationMap[Token::Dot] = ".";
+    _tokenRepresentationMap[Token::Comma] = ",";
+    _tokenRepresentationMap[Token::OpenBracket] = "(";
+    _tokenRepresentationMap[Token::CloseBracket] = ")";
+    _tokenRepresentationMap[Token::Plus] = "+";
+    _tokenRepresentationMap[Token::Minus] = "-";
+    _tokenRepresentationMap[Token::Multiply] = "*";
+    _tokenRepresentationMap[Token::Divide] = "/";
+
+    isInitialized = true;
+  }
 
   // Dynamically calculate the longest token
   auto longestToken = std::max_element(this->_tokenRepresentationMap.begin(),
@@ -83,12 +91,12 @@ std::map<size_t, std::string> TinyLexicalAnalyzer::getValues()
   return this->_valuesMap;
 }
 
-std::vector<TinyLexicalAnalyzer::Token> TinyLexicalAnalyzer::getTokens()
+std::queue<TinyLexicalAnalyzer::Token> TinyLexicalAnalyzer::getTokens()
 {
   return this->_tokens;
 }
 
-std::string TinyLexicalAnalyzer::convertTokenToString(TinyLexicalAnalyzer::Token token)
+std::string TinyLexicalAnalyzer::convertTokenToString(Token token)
 {
   switch (token)
   {
@@ -195,7 +203,7 @@ bool TinyLexicalAnalyzer::handleCharsAndStrings(std::istream &tinyProgram, char 
     textBuffer.push_back(tinyProgram.get());
     nextChar = tinyProgram.get();
 
-    _tokens.push_back(Token::Character);
+    _tokens.push(Token::Character);
 
     if (textBuffer == "\'")
     {
@@ -235,7 +243,7 @@ bool TinyLexicalAnalyzer::handleCharsAndStrings(std::istream &tinyProgram, char 
       }
     } while (nextChar != '\"');
 
-    _tokens.push_back(Token::String);
+    _tokens.push(Token::String);
 
     if (textBuffer == "\"")
       this->_valuesMap[_tokens.size() - 1] = "";
@@ -262,7 +270,7 @@ bool TinyLexicalAnalyzer::handleKeywords(std::istream &tinyProgram, char nextCha
     try
     {
       Token token = convertStringToToken(textBuffer);
-      _tokens.push_back(token);
+      _tokens.push(token);
       return true;
     }
     catch (const std::out_of_range &e)
@@ -290,7 +298,7 @@ bool TinyLexicalAnalyzer::handleNumbersAndIdentifiers(std::istream &tinyProgram,
       textBuffer.push_back(nextChar);
     }
 
-    _tokens.push_back(Token::Number);
+    _tokens.push(Token::Number);
     this->_valuesMap[_tokens.size() - 1] = std::string(textBuffer.begin(), textBuffer.end() - 1);
 
     tinyProgram.unget();
@@ -305,7 +313,7 @@ bool TinyLexicalAnalyzer::handleNumbersAndIdentifiers(std::istream &tinyProgram,
       textBuffer.push_back(nextChar);
     }
 
-    _tokens.push_back(Token::Identifier);
+    _tokens.push(Token::Identifier);
     this->_valuesMap[_tokens.size() - 1] = std::string(textBuffer.begin(), textBuffer.end() - 1);
 
     tinyProgram.unget();

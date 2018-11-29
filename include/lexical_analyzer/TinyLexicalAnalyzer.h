@@ -3,8 +3,7 @@
 
 #include <string>
 #include <map>
-#include <vector>
-#include <regex>
+#include <queue>
 
 class TinyLexicalAnalyzer
 {
@@ -14,7 +13,7 @@ public:
 
   // The token order listed here, not in the constructor,
   //  is what determines parsing matching order
-  enum Token
+  enum class Token
   {
     Program,
     Variable,
@@ -77,7 +76,7 @@ public:
 
   void analyzeProgram(std::istream &tinyProgram);
 
-  std::vector<Token> getTokens();
+  std::queue<TinyLexicalAnalyzer::Token> getTokens();
   std::map<size_t, std::string> getValues();
 
   std::string convertTokenToString(Token token);
@@ -89,9 +88,10 @@ private:
   bool handleKeywords(std::istream &tinyProgram, char nextChar);
   bool handleNumbersAndIdentifiers(std::istream &tinyProgram, char nextChar);
 
-  std::vector<Token> _tokens;
-  // TODO: Replace with unordered_map
-  std::map<Token, std::string> _tokenRepresentationMap;
+  static std::map<Token, std::string> _tokenRepresentationMap;
+  static bool isInitialized;
+
+  std::queue<Token> _tokens;
   std::map<size_t, std::string> _valuesMap;
   size_t _maxLookupSize;
   bool _insideCommentBlockType1;

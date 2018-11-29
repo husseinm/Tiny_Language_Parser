@@ -2,8 +2,8 @@
 #include <fstream>
 #include <string.h>
 
-#include "./include/TinyLexicalAnalyzer.h"
-#include "./include/TinyParser.h"
+#include "./include/lexical_analyzer/TinyLexicalAnalyzer.h"
+#include "./include/parser/TinyParser.h"
 
 int main(int argc, char **argv)
 {
@@ -34,6 +34,8 @@ int main(int argc, char **argv)
     std::cout << "HELP:" << std::endl;
     std::cout << "\t subc <-ast | -lex> PATH_TO_TINY_PROGRAM" << std::endl;
     std::cout << std::endl;
+
+    return -1;
   }
 
   // Read the given file
@@ -56,16 +58,19 @@ int main(int argc, char **argv)
 
   if (lexFlag)
   {
-    for (size_t i = 0; i < lexTokens.size(); i++)
+    size_t initialSize = lexTokens.size();
+
+    for (size_t i = 0; i < initialSize; i++)
     {
-      TinyLexicalAnalyzer::Token token = lexTokens.at(i);
+      TinyLexicalAnalyzer::Token token = lexTokens.front();
+      lexTokens.pop();
 
       std::cout << programAnalyzer.convertTokenToString(token);
 
-      if (token == TinyLexicalAnalyzer::Character ||
-          token == TinyLexicalAnalyzer::String ||
-          token == TinyLexicalAnalyzer::Number ||
-          token == TinyLexicalAnalyzer::Identifier)
+      if (token == TinyLexicalAnalyzer::Token::Character ||
+          token == TinyLexicalAnalyzer::Token::String ||
+          token == TinyLexicalAnalyzer::Token::Number ||
+          token == TinyLexicalAnalyzer::Token::Identifier)
       {
         std::cout << " | " << tokenValues.at(i) << std::endl;
       }
@@ -84,7 +89,7 @@ int main(int argc, char **argv)
 
   if (astFlag)
   {
-    programParser.printAst();
+    programParser.getAst().print();
   }
 
   return 0;
