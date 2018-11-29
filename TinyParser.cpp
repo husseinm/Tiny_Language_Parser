@@ -5,17 +5,6 @@
 TinyParser::TinyParser()
 {
   this->_ast = TreeNode();
-
-  TreeNode subChild1 = TreeNode();
-  subChild1.type = TreeNode::Type::Assignment;
-
-  TreeNode child1 = TreeNode();
-  child1.type = TreeNode::Type::And;
-  child1.children.push_back(subChild1);
-
-  this->_ast.type = TreeNode::Type::Program;
-  this->_ast.children.push_back(child1);
-  this->_ast.children.push_back(child1);
 }
 
 TinyParser::~TinyParser()
@@ -318,6 +307,8 @@ void TinyParser::Statement()
   case (TinyLexicalAnalyzer::Token::Begin):
     Body();
     break;
+  default:
+    break;
   }
 };
 
@@ -394,6 +385,8 @@ void TinyParser::AssignmentNode()
     assertNextToken(TinyLexicalAnalyzer::Token::Swap);
     Name();
     break;
+  default:
+    break;
   }
 };
 
@@ -443,6 +436,8 @@ void TinyParser::Expression()
     assertNextToken(TinyLexicalAnalyzer::Token::NE);
     Term();
     break;
+  default:
+    break;
   }
 };
 
@@ -463,6 +458,8 @@ void TinyParser::Term()
   case (TinyLexicalAnalyzer::Token::Or):
     assertNextToken(TinyLexicalAnalyzer::Token::Or);
     Factor();
+    break;
+  default:
     break;
   }
 };
@@ -488,6 +485,8 @@ void TinyParser::Factor()
   case (TinyLexicalAnalyzer::Token::Mod):
     assertNextToken(TinyLexicalAnalyzer::Token::Mod);
     Primary();
+    break;
+  default:
     break;
   }
 };
@@ -559,6 +558,8 @@ void TinyParser::Primary()
     assertNextToken(TinyLexicalAnalyzer::Token::OpenBracket);
     Expression();
     assertNextToken(TinyLexicalAnalyzer::Token::CloseBracket);
+    break;
+  default:
     break;
   }
 };
