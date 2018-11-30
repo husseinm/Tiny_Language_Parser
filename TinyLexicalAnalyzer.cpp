@@ -262,7 +262,16 @@ bool TinyLexicalAnalyzer::handleKeywords(std::istream &tinyProgram, char nextCha
   textBuffer.push_back(nextChar);
 
   for (size_t i = 0; i < this->_maxLookupSize; i++)
-    textBuffer.push_back(tinyProgram.get());
+  {
+    nextChar = tinyProgram.get();
+
+    if (isspace(nextChar))
+    {
+      break;
+    }
+
+    textBuffer.push_back(nextChar);
+  }
 
   while (textBuffer.length() > 0)
   {

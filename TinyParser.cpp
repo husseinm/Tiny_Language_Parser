@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string.h>
 
 #include "./include/parser/TinyParser.h"
 
@@ -21,6 +22,7 @@ void TinyParser::parseProgram(std::queue<TinyLexicalAnalyzer::Token> tokens,
 {
   this->tokens = &tokens;
   this->values = &values;
+  this->initialQueueSize = tokens.size();
 
   Tiny();
 }
@@ -37,7 +39,7 @@ void TinyParser::assertNextToken(TinyLexicalAnalyzer::Token expected)
 
   char errorBuffer[115];
 
-  sprintf(errorBuffer, "Parser failed to parse Token of type %s Expected \'%s\'",
+  sprintf(errorBuffer, "Parser failed to parse Token of type \'%s\' Expected \'%s\'",
           TinyLexicalAnalyzer::convertTokenToString(currentToken).c_str(),
           TinyLexicalAnalyzer::convertTokenToString(expected).c_str());
 
@@ -47,40 +49,58 @@ void TinyParser::assertNextToken(TinyLexicalAnalyzer::Token expected)
 void TinyParser::Tiny()
 {
   assertNextToken(TinyLexicalAnalyzer::Token::Program);
-  Name();
+  this->_ast.children.push_back(Name());
   assertNextToken(TinyLexicalAnalyzer::Token::Colon);
-  Consts();
-  Types();
-  Dclns();
-  SubProgs();
-  Body();
-  Name();
+  this->_ast.children.push_back(Consts());
+  this->_ast.children.push_back(Types());
+  this->_ast.children.push_back(Dclns());
+  this->_ast.children.push_back(SubProgs());
+  this->_ast.children.push_back(Body());
+  this->_ast.children.push_back(Name());
   assertNextToken(TinyLexicalAnalyzer::Token::Dot);
+
+  this->_ast.type = TreeNode::Type::Program;
 };
 
-void TinyParser::Consts()
+TreeNode TinyParser::Consts()
 {
+  TreeNode node = TreeNode();
+  node.type = TreeNode::Type::Consts;
+
   if (this->tokens->front() == TinyLexicalAnalyzer::Token::Constant)
   {
-    do
+    assertNextToken(TinyLexicalAnalyzer::Token::Constant);
+    node.children.push_back(Const());
+
+    while (this->tokens->front() == TinyLexicalAnalyzer::Token::Comma)
     {
-      assertNextToken(TinyLexicalAnalyzer::Token::Constant);
-      Const();
-    } while (this->tokens->front() == TinyLexicalAnalyzer::Token::Comma);
+      assertNextToken(TinyLexicalAnalyzer::Token::Comma);
+      node.children.push_back(Const());
+    }
 
     assertNextToken(TinyLexicalAnalyzer::Token::Semicolon);
   }
+
+  return node;
 };
 
-void TinyParser::Const()
+TreeNode TinyParser::Const()
 {
-  Name();
+  TreeNode node = TreeNode();
+  node.type = TreeNode::Type::Const;
+
+  node.children.push_back(Name());
   assertNextToken(TinyLexicalAnalyzer::Token::Assignment);
-  ConstValue();
+  node.children.push_back(ConstValue());
+
+  return node;
 };
 
-void TinyParser::ConstValue()
+TreeNode TinyParser::ConstValue()
 {
+  TreeNode node = TreeNode();
+  node.type = TreeNode::Type::Const;
+
   switch (this->tokens->front())
   {
   case (TinyLexicalAnalyzer::Token::Number):
@@ -90,440 +110,591 @@ void TinyParser::ConstValue()
     assertNextToken(TinyLexicalAnalyzer::Token::Character);
     break;
   default:
-    Name();
+    node.children.push_back(Name());
   }
+
+  return node;
 };
 
-void TinyParser::Types()
+TreeNode TinyParser::Types()
 {
+  TreeNode node = TreeNode();
+  node.type = TreeNode::Type::Types;
+
   if (this->tokens->front() == TinyLexicalAnalyzer::Token::Type)
   {
     assertNextToken(TinyLexicalAnalyzer::Token::Type);
 
     do
     {
-      TypeNode();
+      node.children.push_back(TypeNode());
       assertNextToken(TinyLexicalAnalyzer::Token::Semicolon);
     } while (this->tokens->front() == TinyLexicalAnalyzer::Token::Identifier);
   }
+
+  return node;
 };
 
-void TinyParser::TypeNode()
+TreeNode TinyParser::TypeNode()
 {
-  Name();
-  assertNextToken(TinyLexicalAnalyzer::Token::Assignment);
-  LitList();
+  TreeNode node = TreeNode();
+  node.type = TreeNode::Type::Type;
+
+  node.children.push_back(Name());
+  assertNextToken(TinyLexicalAnalyzer::Token::Eq);
+  node.children.push_back(LitList());
+
+  return node;
 };
 
-void TinyParser::LitList()
+TreeNode TinyParser::LitList()
 {
+  TreeNode node = TreeNode();
+  node.type = TreeNode::Type::Lit;
+
   assertNextToken(TinyLexicalAnalyzer::Token::OpenBracket);
-  Name();
+  node.children.push_back(Name());
 
   while (this->tokens->front() == TinyLexicalAnalyzer::Token::Comma)
   {
     assertNextToken(TinyLexicalAnalyzer::Token::Comma);
-    Name();
+    node.children.push_back(Name());
   }
 
   assertNextToken(TinyLexicalAnalyzer::Token::CloseBracket);
+
+  return node;
 };
 
-void TinyParser::SubProgs()
+TreeNode TinyParser::SubProgs()
 {
+  TreeNode node = TreeNode();
+  node.type = TreeNode::Type::Subprogs;
+
   while (this->tokens->front() == TinyLexicalAnalyzer::Token::Function)
   {
-    Fcn();
+    node.children.push_back(Fcn());
   }
+
+  return node;
 };
 
-void TinyParser::Fcn()
+TreeNode TinyParser::Fcn()
 {
+  TreeNode node = TreeNode();
+  node.type = TreeNode::Type::Fcn;
+
   assertNextToken(TinyLexicalAnalyzer::Token::Function);
-  Name();
+  node.children.push_back(Name());
   assertNextToken(TinyLexicalAnalyzer::Token::OpenBracket);
-  Params();
+  node.children.push_back(Params());
   assertNextToken(TinyLexicalAnalyzer::Token::CloseBracket);
   assertNextToken(TinyLexicalAnalyzer::Token::Colon);
-  Name();
+  node.children.push_back(Name());
   assertNextToken(TinyLexicalAnalyzer::Token::Semicolon);
-  Consts();
-  Types();
-  Dclns();
-  Body();
-  Name();
+  node.children.push_back(Consts());
+  node.children.push_back(Types());
+  node.children.push_back(Dclns());
+  node.children.push_back(Body());
+  node.children.push_back(Name());
   assertNextToken(TinyLexicalAnalyzer::Token::Semicolon);
+
+  return node;
 };
 
-void TinyParser::Params()
+TreeNode TinyParser::Params()
 {
-  Dcln();
+  TreeNode node = TreeNode();
+  node.type = TreeNode::Type::Params;
+
+  node.children.push_back(Dcln());
 
   while (this->tokens->front() == TinyLexicalAnalyzer::Token::Semicolon)
   {
     assertNextToken(TinyLexicalAnalyzer::Token::Semicolon);
-    Dcln();
+    node.children.push_back(Dcln());
   }
+
+  return node;
 };
 
-void TinyParser::Dclns()
+TreeNode TinyParser::Dclns()
 {
+  TreeNode node = TreeNode();
+  node.type = TreeNode::Type::Dclns;
+
   if (this->tokens->front() == TinyLexicalAnalyzer::Token::Variable)
   {
     assertNextToken(TinyLexicalAnalyzer::Token::Variable);
 
     do
     {
-      Dcln();
+      node.children.push_back(Dcln());
       assertNextToken(TinyLexicalAnalyzer::Token::Semicolon);
     } while (this->tokens->front() == TinyLexicalAnalyzer::Token::Identifier);
   }
+
+  return node;
 };
 
-void TinyParser::Dcln()
+TreeNode TinyParser::Dcln()
 {
-  Name();
+  TreeNode node = TreeNode();
+  node.type = TreeNode::Type::Var;
+
+  node.children.push_back(Name());
 
   while (this->tokens->front() == TinyLexicalAnalyzer::Token::Comma)
   {
     assertNextToken(TinyLexicalAnalyzer::Token::Comma);
-    Name();
+    node.children.push_back(Name());
   }
 
   assertNextToken(TinyLexicalAnalyzer::Token::Colon);
-  Name();
+  node.children.push_back(Name());
+
+  return node;
 };
 
-void TinyParser::Body()
+TreeNode TinyParser::Body()
 {
+  TreeNode node = TreeNode();
+  node.type = TreeNode::Type::Block;
+
   assertNextToken(TinyLexicalAnalyzer::Token::Begin);
-  Statement();
+  node.children.push_back(Statement());
 
   while (this->tokens->front() == TinyLexicalAnalyzer::Token::Semicolon)
   {
     assertNextToken(TinyLexicalAnalyzer::Token::Semicolon);
-    Statement();
+    node.children.push_back(Statement());
   }
 
   assertNextToken(TinyLexicalAnalyzer::Token::End);
+
+  return node;
 };
 
-void TinyParser::Statement()
+TreeNode TinyParser::Statement()
 {
+  TreeNode node = TreeNode();
+
   switch (this->tokens->front())
   {
   case (TinyLexicalAnalyzer::Token::Identifier):
-    AssignmentNode();
+    return AssignmentNode();
     break;
   case (TinyLexicalAnalyzer::Token::Output):
+    node.type = TreeNode::Type::Output;
     assertNextToken(TinyLexicalAnalyzer::Token::Output);
     assertNextToken(TinyLexicalAnalyzer::Token::OpenBracket);
 
-    OutExp();
+    node.children.push_back(OutExp());
 
     while (this->tokens->front() == TinyLexicalAnalyzer::Token::Comma)
     {
       assertNextToken(TinyLexicalAnalyzer::Token::Comma);
-      OutExp();
+      node.children.push_back(OutExp());
     }
 
     assertNextToken(TinyLexicalAnalyzer::Token::CloseBracket);
     break;
   case (TinyLexicalAnalyzer::Token::If):
+    node.type = TreeNode::Type::If;
     assertNextToken(TinyLexicalAnalyzer::Token::If);
-    Expression();
+    node.children.push_back(Expression());
     assertNextToken(TinyLexicalAnalyzer::Token::Then);
-    Statement();
+    node.children.push_back(Statement());
     if (this->tokens->front() == TinyLexicalAnalyzer::Token::Else)
     {
       assertNextToken(TinyLexicalAnalyzer::Token::Else);
-      Statement();
+      node.children.push_back(Statement());
     }
     break;
   case (TinyLexicalAnalyzer::Token::While):
+    node.type = TreeNode::Type::While;
     assertNextToken(TinyLexicalAnalyzer::Token::While);
-    Expression();
+    node.children.push_back(Expression());
     assertNextToken(TinyLexicalAnalyzer::Token::Do);
-    Statement();
+    node.children.push_back(Statement());
     break;
   case (TinyLexicalAnalyzer::Token::Repeat):
+    node.type = TreeNode::Type::Repeat;
     assertNextToken(TinyLexicalAnalyzer::Token::Repeat);
-    Statement();
+    node.children.push_back(Statement());
     while (this->tokens->front() == TinyLexicalAnalyzer::Token::Semicolon)
     {
       assertNextToken(TinyLexicalAnalyzer::Token::Semicolon);
-      Statement();
+      node.children.push_back(Statement());
     }
     assertNextToken(TinyLexicalAnalyzer::Token::Until);
-    Expression();
+    node.children.push_back(Expression());
     break;
   case (TinyLexicalAnalyzer::Token::For):
+    node.type = TreeNode::Type::For;
     assertNextToken(TinyLexicalAnalyzer::Token::For);
     assertNextToken(TinyLexicalAnalyzer::Token::OpenBracket);
-    ForStat();
+    node.children.push_back(ForStat());
     assertNextToken(TinyLexicalAnalyzer::Token::Semicolon);
-    ForExp();
+    node.children.push_back(ForExp());
     assertNextToken(TinyLexicalAnalyzer::Token::Semicolon);
-    ForStat();
+    node.children.push_back(ForStat());
     assertNextToken(TinyLexicalAnalyzer::Token::CloseBracket);
-    Statement();
+    node.children.push_back(Statement());
     break;
   case (TinyLexicalAnalyzer::Token::Loop):
+    node.type = TreeNode::Type::Loop;
     assertNextToken(TinyLexicalAnalyzer::Token::Loop);
-    Statement();
+    node.children.push_back(Statement());
     while (this->tokens->front() == TinyLexicalAnalyzer::Token::Semicolon)
     {
       assertNextToken(TinyLexicalAnalyzer::Token::Semicolon);
-      Statement();
+      node.children.push_back(Statement());
     }
     assertNextToken(TinyLexicalAnalyzer::Token::Pool);
     break;
   case (TinyLexicalAnalyzer::Token::Case):
+    node.type = TreeNode::Type::Case;
     assertNextToken(TinyLexicalAnalyzer::Token::Case);
-    Expression();
+    node.children.push_back(Expression());
     assertNextToken(TinyLexicalAnalyzer::Token::Of);
-    CaseClauses();
-    OtherwiseClause();
+    node.children.push_back(CaseClauses());
+    if (this->tokens->front() == TinyLexicalAnalyzer::Token::Otherwise)
+    {
+      node.children.push_back(OtherwiseClause());
+    }
     assertNextToken(TinyLexicalAnalyzer::Token::End);
     break;
   case (TinyLexicalAnalyzer::Token::Read):
+    node.type = TreeNode::Type::Read;
     assertNextToken(TinyLexicalAnalyzer::Token::Read);
     assertNextToken(TinyLexicalAnalyzer::Token::OpenBracket);
-    Name();
+    node.children.push_back(Name());
     while (this->tokens->front() == TinyLexicalAnalyzer::Token::Comma)
     {
       assertNextToken(TinyLexicalAnalyzer::Token::Comma);
-      Name();
+      node.children.push_back(Name());
     }
     assertNextToken(TinyLexicalAnalyzer::Token::CloseBracket);
     break;
   case (TinyLexicalAnalyzer::Token::Exit):
+    node.type = TreeNode::Type::Exit;
     assertNextToken(TinyLexicalAnalyzer::Token::Exit);
     break;
   case (TinyLexicalAnalyzer::Token::Return):
+    node.type = TreeNode::Type::Return;
     assertNextToken(TinyLexicalAnalyzer::Token::Return);
-    Expression();
+    node.children.push_back(Expression());
     break;
   case (TinyLexicalAnalyzer::Token::Begin):
-    Body();
+    return Body();
     break;
   default:
+    node.type = TreeNode::Type::Null;
     break;
   }
+
+  return node;
 };
 
-void TinyParser::OutExp()
+TreeNode TinyParser::OutExp()
 {
+  TreeNode node = TreeNode();
+
   if (this->tokens->front() == TinyLexicalAnalyzer::Token::String)
   {
-    StringNode();
+    node.type = TreeNode::Type::String;
+    node.children.push_back(StringNode());
   }
   else
   {
-    Expression();
+    node.type = TreeNode::Type::Integer;
+    node.children.push_back(Expression());
   }
+
+  return node;
 };
 
-void TinyParser::StringNode()
+TreeNode TinyParser::StringNode()
 {
+  TreeNode node = TreeNode();
+  node.type = TreeNode::Type::String;
+
   assertNextToken(TinyLexicalAnalyzer::Token::String);
+
+  return node;
 };
 
-void TinyParser::CaseClauses()
+TreeNode TinyParser::CaseClauses()
 {
+  TreeNode node = TreeNode();
+
   do
   {
-    CaseClause();
+    node.children.push_back(CaseClause());
     assertNextToken(TinyLexicalAnalyzer::Token::Semicolon);
-  } while (this->tokens->front() != TinyLexicalAnalyzer::Token::Otherwise);
+  } while (this->tokens->front() != TinyLexicalAnalyzer::Token::Otherwise &&
+           this->tokens->front() != TinyLexicalAnalyzer::Token::End);
+
+  return node;
 };
 
-void TinyParser::CaseClause()
+TreeNode TinyParser::CaseClause()
 {
-  CaseExpression();
+  TreeNode node = TreeNode();
+  node.type = TreeNode::Type::CaseClause;
+
+  node.children.push_back(CaseExpression());
 
   while (this->tokens->front() == TinyLexicalAnalyzer::Token::Comma)
   {
     assertNextToken(TinyLexicalAnalyzer::Token::Comma);
-    CaseExpression();
+    node.children.push_back(CaseExpression());
   }
   assertNextToken(TinyLexicalAnalyzer::Token::Colon);
-  Statement();
+  node.children.push_back(Statement());
+
+  return node;
 };
 
-void TinyParser::CaseExpression()
+TreeNode TinyParser::CaseExpression()
 {
-  ConstValue();
+  TreeNode node = TreeNode();
+  TreeNode tmp = ConstValue();
 
   if (this->tokens->front() == TinyLexicalAnalyzer::Token::Elipses)
   {
+    node.children.push_back(tmp);
+    node.type = TreeNode::Type::Ellipses;
     assertNextToken(TinyLexicalAnalyzer::Token::Elipses);
-    ConstValue();
+    node.children.push_back(ConstValue());
   }
-};
-
-void TinyParser::OtherwiseClause()
-{
-  if (this->tokens->front() == TinyLexicalAnalyzer::Token::Otherwise)
+  else
   {
-    assertNextToken(TinyLexicalAnalyzer::Token::Otherwise);
-    Statement();
+    return tmp;
   }
+
+  return node;
 };
 
-void TinyParser::AssignmentNode()
+TreeNode TinyParser::OtherwiseClause()
 {
-  Name();
+  TreeNode node = TreeNode();
+
+  node.type = TreeNode::Type::Otherwise;
+  assertNextToken(TinyLexicalAnalyzer::Token::Otherwise);
+  node.children.push_back(Statement());
+
+  return node;
+};
+
+TreeNode TinyParser::AssignmentNode()
+{
+  TreeNode node = TreeNode();
+
+  node.children.push_back(Name());
 
   switch (this->tokens->front())
   {
   case (TinyLexicalAnalyzer::Token::Assignment):
+    node.type = TreeNode::Type::Assign;
     assertNextToken(TinyLexicalAnalyzer::Token::Assignment);
-    Expression();
+    node.children.push_back(Expression());
     break;
   case (TinyLexicalAnalyzer::Token::Swap):
+    node.type = TreeNode::Type::Swap;
     assertNextToken(TinyLexicalAnalyzer::Token::Swap);
-    Name();
+    node.children.push_back(Name());
     break;
   default:
     break;
   }
+
+  return node;
 };
 
-void TinyParser::ForStat()
+TreeNode TinyParser::ForStat()
 {
+  TreeNode node = TreeNode();
+  node.type = TreeNode::Type::Null;
+
   if (this->tokens->front() == TinyLexicalAnalyzer::Token::Identifier)
   {
-    AssignmentNode();
+    return AssignmentNode();
   }
+
+  return node;
 };
 
-void TinyParser::ForExp()
+TreeNode TinyParser::ForExp()
 {
+  TreeNode node = TreeNode();
+  node.type = TreeNode::Type::True;
+
   if (this->tokens->front() != TinyLexicalAnalyzer::Token::Semicolon)
   {
-    Expression();
+    return Expression();
   }
+
+  return node;
 };
 
-void TinyParser::Expression()
+TreeNode TinyParser::Expression()
 {
-  Term();
+  TreeNode node = TreeNode();
+  TreeNode tmp = Term();
+
+  node.children.push_back(tmp);
 
   switch (this->tokens->front())
   {
   case (TinyLexicalAnalyzer::Token::LE):
+    node.type = TreeNode::Type::LE;
     assertNextToken(TinyLexicalAnalyzer::Token::LE);
-    Term();
-    break;
+    node.children.push_back(Term());
+    return node;
   case (TinyLexicalAnalyzer::Token::LT):
+    node.type = TreeNode::Type::LT;
     assertNextToken(TinyLexicalAnalyzer::Token::LT);
-    Term();
-    break;
+    node.children.push_back(Term());
+    return node;
   case (TinyLexicalAnalyzer::Token::GE):
+    node.type = TreeNode::Type::GE;
     assertNextToken(TinyLexicalAnalyzer::Token::GE);
-    Term();
-    break;
+    node.children.push_back(Term());
+    return node;
   case (TinyLexicalAnalyzer::Token::GT):
+    node.type = TreeNode::Type::GT;
     assertNextToken(TinyLexicalAnalyzer::Token::GT);
-    Term();
-    break;
+    node.children.push_back(Term());
+    return node;
   case (TinyLexicalAnalyzer::Token::Eq):
+    node.type = TreeNode::Type::EQ;
     assertNextToken(TinyLexicalAnalyzer::Token::Eq);
-    Term();
-    break;
+    node.children.push_back(Term());
+    return node;
   case (TinyLexicalAnalyzer::Token::NE):
+    node.type = TreeNode::Type::NE;
     assertNextToken(TinyLexicalAnalyzer::Token::NE);
-    Term();
-    break;
+    node.children.push_back(Term());
+    return node;
   default:
     break;
   }
+
+  return tmp;
 };
 
-void TinyParser::Term()
+TreeNode TinyParser::Term()
 {
-  Factor();
+  TreeNode node = TreeNode();
+  TreeNode tmp = Factor();
+
+  node.children.push_back(tmp);
 
   switch (this->tokens->front())
   {
   case (TinyLexicalAnalyzer::Token::Plus):
+    node.type = TreeNode::Type::Plus;
     assertNextToken(TinyLexicalAnalyzer::Token::Plus);
-    Factor();
+    node.children.push_back(Factor());
     break;
   case (TinyLexicalAnalyzer::Token::Minus):
+    node.type = TreeNode::Type::Minus;
     assertNextToken(TinyLexicalAnalyzer::Token::Minus);
-    Factor();
+    node.children.push_back(Factor());
     break;
   case (TinyLexicalAnalyzer::Token::Or):
+    node.type = TreeNode::Type::Or;
     assertNextToken(TinyLexicalAnalyzer::Token::Or);
-    Factor();
+    node.children.push_back(Factor());
     break;
   default:
     break;
   }
+
+  return node;
 };
 
-void TinyParser::Factor()
+TreeNode TinyParser::Factor()
 {
-  Primary();
+  TreeNode node = TreeNode();
+  TreeNode tmp = Primary();
+
+  node.children.push_back(tmp);
 
   switch (this->tokens->front())
   {
   case (TinyLexicalAnalyzer::Token::Multiply):
+    node.type = TreeNode::Type::Multiply;
     assertNextToken(TinyLexicalAnalyzer::Token::Multiply);
-    Primary();
+    node.children.push_back(Primary());
     break;
   case (TinyLexicalAnalyzer::Token::Divide):
+    node.type = TreeNode::Type::Divide;
     assertNextToken(TinyLexicalAnalyzer::Token::Divide);
-    Primary();
+    node.children.push_back(Primary());
     break;
   case (TinyLexicalAnalyzer::Token::And):
+    node.type = TreeNode::Type::And;
     assertNextToken(TinyLexicalAnalyzer::Token::And);
-    Primary();
+    node.children.push_back(Primary());
     break;
   case (TinyLexicalAnalyzer::Token::Mod):
+    node.type = TreeNode::Type::Mod;
     assertNextToken(TinyLexicalAnalyzer::Token::Mod);
-    Primary();
+    node.children.push_back(Primary());
     break;
   default:
     break;
   }
+
+  return node;
 };
 
-void TinyParser::Primary()
+TreeNode TinyParser::Primary()
 {
+  TreeNode node = TreeNode();
+  TreeNode tmp = TreeNode();
+
   switch (this->tokens->front())
   {
   case (TinyLexicalAnalyzer::Token::Minus):
+    node.type = TreeNode::Type::Minus;
     assertNextToken(TinyLexicalAnalyzer::Token::Minus);
-    Primary();
-    break;
+    node.children.push_back(Primary());
+    return node;
   case (TinyLexicalAnalyzer::Token::Plus):
     assertNextToken(TinyLexicalAnalyzer::Token::Plus);
-    Primary();
-    break;
+    return Primary();
   case (TinyLexicalAnalyzer::Token::Not):
+    node.type = TreeNode::Type::Not;
     assertNextToken(TinyLexicalAnalyzer::Token::Not);
-    Primary();
-    break;
+    node.children.push_back(Primary());
+    return node;
   case (TinyLexicalAnalyzer::Token::Eof):
+    node.type = TreeNode::Type::Eof;
     assertNextToken(TinyLexicalAnalyzer::Token::Eof);
-    break;
+    return node;
   case (TinyLexicalAnalyzer::Token::Identifier):
-    assertNextToken(TinyLexicalAnalyzer::Token::Identifier);
+    tmp = Name();
+
     if (this->tokens->front() == TinyLexicalAnalyzer::Token::OpenBracket)
     {
+      node.children.push_back(tmp);
       assertNextToken(TinyLexicalAnalyzer::Token::OpenBracket);
-      Expression();
+      node.children.push_back(Expression());
       while (this->tokens->front() == TinyLexicalAnalyzer::Token::Comma)
       {
         assertNextToken(TinyLexicalAnalyzer::Token::Comma);
-        Expression();
+        node.children.push_back(Expression());
       }
       assertNextToken(TinyLexicalAnalyzer::Token::CloseBracket);
+
+      return node;
     }
-    break;
+
+    return tmp;
   case (TinyLexicalAnalyzer::Token::Number):
     assertNextToken(TinyLexicalAnalyzer::Token::Number);
     break;
@@ -532,39 +703,61 @@ void TinyParser::Primary()
     break;
   case (TinyLexicalAnalyzer::Token::OpenBracket):
     assertNextToken(TinyLexicalAnalyzer::Token::OpenBracket);
-    Expression();
+    node = Expression();
     assertNextToken(TinyLexicalAnalyzer::Token::CloseBracket);
-    break;
+    return node;
   case (TinyLexicalAnalyzer::Token::Successor):
+    node.type = TreeNode::Type::Succ;
     assertNextToken(TinyLexicalAnalyzer::Token::Successor);
     assertNextToken(TinyLexicalAnalyzer::Token::OpenBracket);
-    Expression();
+    node.children.push_back(Expression());
     assertNextToken(TinyLexicalAnalyzer::Token::CloseBracket);
-    break;
+    return node;
   case (TinyLexicalAnalyzer::Token::Predecessor):
+    node.type = TreeNode::Type::Pred;
     assertNextToken(TinyLexicalAnalyzer::Token::Predecessor);
     assertNextToken(TinyLexicalAnalyzer::Token::OpenBracket);
-    Expression();
+    node.children.push_back(Expression());
     assertNextToken(TinyLexicalAnalyzer::Token::CloseBracket);
-    break;
+    return node;
   case (TinyLexicalAnalyzer::Token::CharFun):
+    node.type = TreeNode::Type::Chr;
     assertNextToken(TinyLexicalAnalyzer::Token::CharFun);
     assertNextToken(TinyLexicalAnalyzer::Token::OpenBracket);
-    Expression();
+    node.children.push_back(Expression());
     assertNextToken(TinyLexicalAnalyzer::Token::CloseBracket);
-    break;
+    return node;
   case (TinyLexicalAnalyzer::Token::OrdFun):
+    node.type = TreeNode::Type::Ord;
     assertNextToken(TinyLexicalAnalyzer::Token::OrdFun);
     assertNextToken(TinyLexicalAnalyzer::Token::OpenBracket);
-    Expression();
+    node.children.push_back(Expression());
     assertNextToken(TinyLexicalAnalyzer::Token::CloseBracket);
-    break;
+    return node;
   default:
     break;
   }
+
+  return node;
 };
 
-void TinyParser::Name()
+TreeNode TinyParser::Name()
 {
+  TreeNode node = TreeNode();
+  TreeNode valueNode = TreeNode();
+
   assertNextToken(TinyLexicalAnalyzer::Token::Identifier);
+
+  const size_t index = this->initialQueueSize - this->tokens->size() - 1;
+  const char *stackValue = this->values->at(index).c_str();
+  char *heapValue = new char[sizeof(stackValue)];
+  strcpy(heapValue, stackValue);
+
+  node.type = TreeNode::Type::Identifier;
+  valueNode.type = TreeNode::Type::IdentifierValue;
+  valueNode.data = (void *)heapValue;
+
+  node.children.push_back(valueNode);
+
+  return node;
 };

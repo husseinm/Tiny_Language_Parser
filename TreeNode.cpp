@@ -12,58 +12,57 @@ TreeNode::TreeNode()
   if (!isInitialized)
   {
     this->_tokenRepresentationMap[TreeNode::Type::Program] = "program";
-    this->_tokenRepresentationMap[TreeNode::Type::Variable] = "var";
-    this->_tokenRepresentationMap[TreeNode::Type::Constant] = "const";
+    this->_tokenRepresentationMap[TreeNode::Type::Consts] = "consts";
+    this->_tokenRepresentationMap[TreeNode::Type::Const] = "const";
+    this->_tokenRepresentationMap[TreeNode::Type::Types] = "types";
     this->_tokenRepresentationMap[TreeNode::Type::Type] = "type";
-    this->_tokenRepresentationMap[TreeNode::Type::Function] = "function";
-    this->_tokenRepresentationMap[TreeNode::Type::Return] = "return";
-    this->_tokenRepresentationMap[TreeNode::Type::Begin] = "begin";
-    this->_tokenRepresentationMap[TreeNode::Type::End] = "end";
-    this->_tokenRepresentationMap[TreeNode::Type::Swap] = ":=:";
-    this->_tokenRepresentationMap[TreeNode::Type::Assignment] = ":=";
-    this->_tokenRepresentationMap[TreeNode::Type::Integer] = "integer";
+    this->_tokenRepresentationMap[TreeNode::Type::Lit] = "lit";
+    this->_tokenRepresentationMap[TreeNode::Type::Subprogs] = "subprogs";
+    this->_tokenRepresentationMap[TreeNode::Type::Fcn] = "fcn";
+    this->_tokenRepresentationMap[TreeNode::Type::Params] = "params";
+    this->_tokenRepresentationMap[TreeNode::Type::Dclns] = "dclns";
+    this->_tokenRepresentationMap[TreeNode::Type::Var] = "var";
+    this->_tokenRepresentationMap[TreeNode::Type::Block] = "block";
     this->_tokenRepresentationMap[TreeNode::Type::Output] = "output";
     this->_tokenRepresentationMap[TreeNode::Type::If] = "if";
-    this->_tokenRepresentationMap[TreeNode::Type::Then] = "then";
-    this->_tokenRepresentationMap[TreeNode::Type::Else] = "else";
     this->_tokenRepresentationMap[TreeNode::Type::While] = "while";
-    this->_tokenRepresentationMap[TreeNode::Type::Do] = "do";
-    this->_tokenRepresentationMap[TreeNode::Type::Case] = "case";
-    this->_tokenRepresentationMap[TreeNode::Type::Of] = "of";
-    this->_tokenRepresentationMap[TreeNode::Type::Elipses] = "..";
-    this->_tokenRepresentationMap[TreeNode::Type::Otherwise] = "otherwise";
     this->_tokenRepresentationMap[TreeNode::Type::Repeat] = "repeat";
     this->_tokenRepresentationMap[TreeNode::Type::For] = "for";
-    this->_tokenRepresentationMap[TreeNode::Type::Until] = "until";
     this->_tokenRepresentationMap[TreeNode::Type::Loop] = "loop";
-    this->_tokenRepresentationMap[TreeNode::Type::Pool] = "pool";
+    this->_tokenRepresentationMap[TreeNode::Type::Case] = "case";
+    this->_tokenRepresentationMap[TreeNode::Type::Read] = "read";
     this->_tokenRepresentationMap[TreeNode::Type::Exit] = "exit";
+    this->_tokenRepresentationMap[TreeNode::Type::Return] = "return";
+    this->_tokenRepresentationMap[TreeNode::Type::Null] = "<null>";
+    this->_tokenRepresentationMap[TreeNode::Type::Integer] = "integer";
+    this->_tokenRepresentationMap[TreeNode::Type::Identifier] = "<identifier>";
+    this->_tokenRepresentationMap[TreeNode::Type::String] = "string";
+    this->_tokenRepresentationMap[TreeNode::Type::CaseClause] = "case_clause";
+    this->_tokenRepresentationMap[TreeNode::Type::Ellipses] = "..";
+    this->_tokenRepresentationMap[TreeNode::Type::Otherwise] = "otherwise";
+    this->_tokenRepresentationMap[TreeNode::Type::Assign] = "assign";
+    this->_tokenRepresentationMap[TreeNode::Type::Swap] = "swap";
+    this->_tokenRepresentationMap[TreeNode::Type::True] = "true";
     this->_tokenRepresentationMap[TreeNode::Type::LE] = "<=";
-    this->_tokenRepresentationMap[TreeNode::Type::NE] = "<>";
     this->_tokenRepresentationMap[TreeNode::Type::LT] = "<";
     this->_tokenRepresentationMap[TreeNode::Type::GE] = ">=";
     this->_tokenRepresentationMap[TreeNode::Type::GT] = ">";
-    this->_tokenRepresentationMap[TreeNode::Type::Eq] = "=";
-    this->_tokenRepresentationMap[TreeNode::Type::Mod] = "mod";
-    this->_tokenRepresentationMap[TreeNode::Type::And] = "and";
-    this->_tokenRepresentationMap[TreeNode::Type::Or] = "or";
-    this->_tokenRepresentationMap[TreeNode::Type::Not] = "not";
-    this->_tokenRepresentationMap[TreeNode::Type::Read] = "read";
-    this->_tokenRepresentationMap[TreeNode::Type::Successor] = "succ";
-    this->_tokenRepresentationMap[TreeNode::Type::Predecessor] = "pred";
-    this->_tokenRepresentationMap[TreeNode::Type::CharFun] = "chr";
-    this->_tokenRepresentationMap[TreeNode::Type::OrdFun] = "ord";
-    this->_tokenRepresentationMap[TreeNode::Type::Eof] = "eof";
-    this->_tokenRepresentationMap[TreeNode::Type::Colon] = ":";
-    this->_tokenRepresentationMap[TreeNode::Type::Semicolon] = ";";
-    this->_tokenRepresentationMap[TreeNode::Type::Dot] = ".";
-    this->_tokenRepresentationMap[TreeNode::Type::Comma] = ",";
-    this->_tokenRepresentationMap[TreeNode::Type::OpenBracket] = "(";
-    this->_tokenRepresentationMap[TreeNode::Type::CloseBracket] = ")";
+    this->_tokenRepresentationMap[TreeNode::Type::EQ] = "=";
+    this->_tokenRepresentationMap[TreeNode::Type::NE] = "<>";
     this->_tokenRepresentationMap[TreeNode::Type::Plus] = "+";
     this->_tokenRepresentationMap[TreeNode::Type::Minus] = "-";
+    this->_tokenRepresentationMap[TreeNode::Type::Or] = "or";
     this->_tokenRepresentationMap[TreeNode::Type::Multiply] = "*";
     this->_tokenRepresentationMap[TreeNode::Type::Divide] = "/";
+    this->_tokenRepresentationMap[TreeNode::Type::And] = "and";
+    this->_tokenRepresentationMap[TreeNode::Type::Mod] = "mod";
+    this->_tokenRepresentationMap[TreeNode::Type::Not] = "not";
+    this->_tokenRepresentationMap[TreeNode::Type::Eof] = "eof";
+    this->_tokenRepresentationMap[TreeNode::Type::Call] = "call";
+    this->_tokenRepresentationMap[TreeNode::Type::Succ] = "succ";
+    this->_tokenRepresentationMap[TreeNode::Type::Pred] = "pred";
+    this->_tokenRepresentationMap[TreeNode::Type::Chr] = "chr";
+    this->_tokenRepresentationMap[TreeNode::Type::Or] = "or";
 
     isInitialized = true;
   }
@@ -75,8 +74,25 @@ TreeNode::~TreeNode()
 
 std::string TreeNode::toString()
 {
-  return this->_tokenRepresentationMap.at(this->type) +
-         "(" + std::to_string(this->children.size()) + ")";
+  std::string nodeName;
+
+  try
+  {
+    nodeName = this->_tokenRepresentationMap.at(this->type);
+  }
+  catch (std::out_of_range e)
+  {
+    if (this->type == Type::IdentifierValue)
+    {
+      nodeName = (char *)this->data;
+    }
+    else
+    {
+      nodeName = "UNDEFINED";
+    }
+  }
+
+  return nodeName + "(" + std::to_string(this->children.size()) + ")";
 }
 
 void TreeNode::print()
