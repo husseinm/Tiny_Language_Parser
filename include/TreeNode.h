@@ -37,6 +37,7 @@ public:
     Return,
     Null,
     Integer,
+    IntegerConst,
     Identifier,
     IdentifierValue,
     String,

@@ -52,6 +52,8 @@ private:
   TreeNode Factor();
   TreeNode Primary();
   TreeNode Name();
+
+  TreeNode ValueNode();
 };
 
 #endif
