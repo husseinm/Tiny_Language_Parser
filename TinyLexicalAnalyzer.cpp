@@ -6,6 +6,7 @@
 
 std::map<TinyLexicalAnalyzer::Token, std::string> TinyLexicalAnalyzer::_tokenRepresentationMap =
     std::map<TinyLexicalAnalyzer::Token, std::string>();
+std::map<TinyLexicalAnalyzer::Token, bool> TinyLexicalAnalyzer::_isTokenTerminal = std::map<TinyLexicalAnalyzer::Token, bool>();
 bool TinyLexicalAnalyzer::isInitialized = false;
 
 TinyLexicalAnalyzer::TinyLexicalAnalyzer() : _insideCommentBlockType1(false), _insideCommentBlockType2(false),
@@ -68,6 +69,39 @@ TinyLexicalAnalyzer::TinyLexicalAnalyzer() : _insideCommentBlockType1(false), _i
     _tokenRepresentationMap[Token::Minus] = "-";
     _tokenRepresentationMap[Token::Multiply] = "*";
     _tokenRepresentationMap[Token::Divide] = "/";
+
+    _isTokenTerminal[Token::Program] = true;
+    _isTokenTerminal[Token::Variable] = true;
+    _isTokenTerminal[Token::Constant] = true;
+    _isTokenTerminal[Token::Type] = true;
+    _isTokenTerminal[Token::Function] = true;
+    _isTokenTerminal[Token::Return] = true;
+    _isTokenTerminal[Token::Begin] = true;
+    _isTokenTerminal[Token::End] = true;
+    _isTokenTerminal[Token::Output] = true;
+    _isTokenTerminal[Token::If] = true;
+    _isTokenTerminal[Token::Then] = true;
+    _isTokenTerminal[Token::Else] = true;
+    _isTokenTerminal[Token::While] = true;
+    _isTokenTerminal[Token::Do] = true;
+    _isTokenTerminal[Token::Case] = true;
+    _isTokenTerminal[Token::Of] = true;
+    _isTokenTerminal[Token::Otherwise] = true;
+    _isTokenTerminal[Token::Repeat] = true;
+    _isTokenTerminal[Token::For] = true;
+    _isTokenTerminal[Token::Until] = true;
+    _isTokenTerminal[Token::Loop] = true;
+    _isTokenTerminal[Token::Pool] = true;
+    _isTokenTerminal[Token::Exit] = true;
+    _isTokenTerminal[Token::Mod] = true;
+    _isTokenTerminal[Token::And] = true;
+    _isTokenTerminal[Token::Or] = true;
+    _isTokenTerminal[Token::Not] = true;
+    _isTokenTerminal[Token::Read] = true;
+    _isTokenTerminal[Token::Successor] = true;
+    _isTokenTerminal[Token::Predecessor] = true;
+    _isTokenTerminal[Token::CharFun] = true;
+    _isTokenTerminal[Token::OrdFun] = true;
 
     isInitialized = true;
   }
@@ -178,8 +212,9 @@ void TinyLexicalAnalyzer::analyzeProgram(std::istream &tinyProgram)
         tinyProgram.seekg(initialLocation);
       }
 
-      if (nextChar == EOF)
+      if (nextChar == EOF) {
         return;
+      }
 
       char errorBuffer[115];
       sprintf(errorBuffer, "Lexical Analyzer failed to translate string starting with \'%c\'"
@@ -262,22 +297,27 @@ bool TinyLexicalAnalyzer::handleKeywords(std::istream &tinyProgram, char nextCha
   textBuffer.push_back(nextChar);
 
   for (size_t i = 0; i < this->_maxLookupSize; i++)
-  {
-    nextChar = tinyProgram.get();
-
-    if (isspace(nextChar))
-    {
-      break;
-    }
-
-    textBuffer.push_back(nextChar);
-  }
+    textBuffer.push_back(tinyProgram.get());
 
   while (textBuffer.length() > 0)
   {
+    if (textBuffer.at(0) == EOF) {
+      return false;
+    }
+
     try
     {
       Token token = convertStringToToken(textBuffer);
+
+      if (this->_isTokenTerminal[token]) {
+        char tempCheck = tinyProgram.get();
+        tinyProgram.unget();
+
+        if (isalpha(tempCheck)) {
+          throw std::out_of_range("Token is part of a larger word");
+        }
+      }
+
       _tokens.push(token);
       return true;
     }

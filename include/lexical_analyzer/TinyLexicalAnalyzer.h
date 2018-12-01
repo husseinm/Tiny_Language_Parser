@@ -88,6 +88,7 @@ private:
   bool handleNumbersAndIdentifiers(std::istream &tinyProgram, char nextChar);
 
   static std::map<Token, std::string> _tokenRepresentationMap;
+  static std::map<Token, bool> _isTokenTerminal;
   static bool isInitialized;
 
   std::queue<Token> _tokens;
