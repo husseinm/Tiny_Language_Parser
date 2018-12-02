@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <memory>
 
 class TreeNode
 {
@@ -72,7 +73,9 @@ public:
 
   std::vector<TreeNode> children;
   Type type;
-  void *data;
+
+  // TODO: Use Smart Pointer
+  char *data;
 
   void print();
   std::string toString();

@@ -596,6 +596,7 @@ TreeNode TinyParser::Expression()
   return tmp;
 };
 
+// TODO: Use Smart Pointers so that this stops leaking...
 TreeNode TinyParser::Term()
 {
   TreeNode tmp = Factor();
@@ -804,13 +805,12 @@ TreeNode TinyParser::ValueNode()
 {
   TreeNode valueNode = TreeNode();
 
+  valueNode.type = TreeNode::Type::IdentifierValue;
+
   const size_t index = this->initialQueueSize - this->tokens->size() - 1;
   const char *stackValue = this->values->at(index).c_str();
-  char *heapValue = new char[sizeof(stackValue)];
-  strcpy(heapValue, stackValue);
-
-  valueNode.type = TreeNode::Type::IdentifierValue;
-  valueNode.data = (void *)heapValue;
+  valueNode.data = new char[sizeof(stackValue)];
+  strcpy(valueNode.data, stackValue);
 
   return valueNode;
 }
