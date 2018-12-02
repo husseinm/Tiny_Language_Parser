@@ -26,13 +26,17 @@ int main(int argc, char **argv)
 
     fileName = argv[2];
   }
+  else if (argc == 2)
+  {
+    fileName = argv[1];
+  }
 
-  if (argc != 3 || (!astFlag && !lexFlag))
+  if ((argc != 3 && argc != 2))
   {
     std::cout << std::endl;
     std::cout << "ERROR: incorrect arguments given." << std::endl;
     std::cout << "HELP:" << std::endl;
-    std::cout << "\t subc <-ast | -lex> PATH_TO_TINY_PROGRAM" << std::endl;
+    std::cout << "\t subc (-ast | -lex) PATH_TO_TINY_PROGRAM" << std::endl;
     std::cout << std::endl;
 
     return -1;

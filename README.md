@@ -20,17 +20,19 @@ The result will be an executable named `subc` in the root directory that can be 
 
 ## Usage
 
-The program requires exactly two arguments, the action & the directory to the program to lex/parse. Below is the help output:
+The program takes either one or two arguments, the action & the directory to the program to lex/parse. Below is the help output:
 
 ```shell
 HELP:
-         subc <-ast | -lex> PATH_TO_TINY_PROGRAM
+         subc (-ast | -lex) PATH_TO_TINY_PROGRAM
 ```
 
 As should be evident, only one option can be supplied, either `-ast` or `-lex`
 
 `-ast` = Will print the full AST of the supplied Tiny program to StdOut.  
 `-lex` = Will print all lexical tokens of the supplied Tiny program to StdOut.
+
+If no flags are supplied then the program will output nothing for a syntactically correct program or an error if not correct.
 
 ## Tests
 
