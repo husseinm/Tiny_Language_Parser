@@ -1,4 +1,4 @@
-#include <iostream>
+#include <istream>
 #include <string.h>
 
 #include "./include/parser/TinyParser.h"
@@ -598,33 +598,55 @@ TreeNode TinyParser::Expression()
 
 TreeNode TinyParser::Term()
 {
-  TreeNode node = TreeNode();
   TreeNode tmp = Factor();
 
-  node.children.push_back(tmp);
+  if (this->tokens->front() != TinyLexicalAnalyzer::Token::Plus &&
+      this->tokens->front() != TinyLexicalAnalyzer::Token::Minus &&
+      this->tokens->front() != TinyLexicalAnalyzer::Token::Or)
+    return tmp;
 
-  switch (this->tokens->front())
+  TreeNode *currentNode = new TreeNode();
+  TreeNode *parentNode = currentNode;
+
+  parentNode->children.push_back(tmp);
+
+  while (
+      this->tokens->front() == TinyLexicalAnalyzer::Token::Plus ||
+      this->tokens->front() == TinyLexicalAnalyzer::Token::Minus ||
+      this->tokens->front() == TinyLexicalAnalyzer::Token::Or)
   {
-  case (TinyLexicalAnalyzer::Token::Plus):
-    node.type = TreeNode::Type::Plus;
-    assertNextToken(TinyLexicalAnalyzer::Token::Plus);
-    node.children.push_back(Factor());
-    return node;
-  case (TinyLexicalAnalyzer::Token::Minus):
-    node.type = TreeNode::Type::Minus;
-    assertNextToken(TinyLexicalAnalyzer::Token::Minus);
-    node.children.push_back(Factor());
-    return node;
-  case (TinyLexicalAnalyzer::Token::Or):
-    node.type = TreeNode::Type::Or;
-    assertNextToken(TinyLexicalAnalyzer::Token::Or);
-    node.children.push_back(Factor());
-    return node;
-  default:
-    break;
+    switch (this->tokens->front())
+    {
+    case (TinyLexicalAnalyzer::Token::Plus):
+      parentNode->type = TreeNode::Type::Plus;
+      assertNextToken(TinyLexicalAnalyzer::Token::Plus);
+      break;
+    case (TinyLexicalAnalyzer::Token::Minus):
+      parentNode->type = TreeNode::Type::Minus;
+      assertNextToken(TinyLexicalAnalyzer::Token::Minus);
+      break;
+    case (TinyLexicalAnalyzer::Token::Or):
+      parentNode->type = TreeNode::Type::Or;
+      assertNextToken(TinyLexicalAnalyzer::Token::Or);
+      break;
+    default:
+      break;
+    }
+
+    tmp = Factor();
+    parentNode->children.push_back(tmp);
+
+    if (this->tokens->front() == TinyLexicalAnalyzer::Token::Plus ||
+        this->tokens->front() == TinyLexicalAnalyzer::Token::Minus ||
+        this->tokens->front() == TinyLexicalAnalyzer::Token::Or)
+    {
+      currentNode = parentNode;
+      parentNode = new TreeNode();
+      parentNode->children.push_back(*currentNode);
+    }
   }
 
-  return tmp;
+  return *parentNode;
 };
 
 TreeNode TinyParser::Factor()
@@ -634,30 +656,37 @@ TreeNode TinyParser::Factor()
 
   node.children.push_back(tmp);
 
-  switch (this->tokens->front())
+  while (
+      this->tokens->front() == TinyLexicalAnalyzer::Token::Multiply ||
+      this->tokens->front() == TinyLexicalAnalyzer::Token::Divide ||
+      this->tokens->front() == TinyLexicalAnalyzer::Token::And ||
+      this->tokens->front() == TinyLexicalAnalyzer::Token::Mod)
   {
-  case (TinyLexicalAnalyzer::Token::Multiply):
-    node.type = TreeNode::Type::Multiply;
-    assertNextToken(TinyLexicalAnalyzer::Token::Multiply);
-    node.children.push_back(Primary());
-    return node;
-  case (TinyLexicalAnalyzer::Token::Divide):
-    node.type = TreeNode::Type::Divide;
-    assertNextToken(TinyLexicalAnalyzer::Token::Divide);
-    node.children.push_back(Primary());
-    return node;
-  case (TinyLexicalAnalyzer::Token::And):
-    node.type = TreeNode::Type::And;
-    assertNextToken(TinyLexicalAnalyzer::Token::And);
-    node.children.push_back(Primary());
-    return node;
-  case (TinyLexicalAnalyzer::Token::Mod):
-    node.type = TreeNode::Type::Mod;
-    assertNextToken(TinyLexicalAnalyzer::Token::Mod);
-    node.children.push_back(Primary());
-    return node;
-  default:
-    break;
+    switch (this->tokens->front())
+    {
+    case (TinyLexicalAnalyzer::Token::Multiply):
+      node.type = TreeNode::Type::Multiply;
+      assertNextToken(TinyLexicalAnalyzer::Token::Multiply);
+      node.children.push_back(Primary());
+      return node;
+    case (TinyLexicalAnalyzer::Token::Divide):
+      node.type = TreeNode::Type::Divide;
+      assertNextToken(TinyLexicalAnalyzer::Token::Divide);
+      node.children.push_back(Primary());
+      return node;
+    case (TinyLexicalAnalyzer::Token::And):
+      node.type = TreeNode::Type::And;
+      assertNextToken(TinyLexicalAnalyzer::Token::And);
+      node.children.push_back(Primary());
+      return node;
+    case (TinyLexicalAnalyzer::Token::Mod):
+      node.type = TreeNode::Type::Mod;
+      assertNextToken(TinyLexicalAnalyzer::Token::Mod);
+      node.children.push_back(Primary());
+      return node;
+    default:
+      break;
+    }
   }
 
   return tmp;
