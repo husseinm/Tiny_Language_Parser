@@ -1,3 +1,0 @@
-Substrings are matched for Keywords by the lexical analyzer ex. "Orange" -> 'Or' in Prog 11
-
-Lexical Analyzer dropping chars from start of identifiers in Prog 12
