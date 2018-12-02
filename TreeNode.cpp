@@ -38,6 +38,7 @@ TreeNode::TreeNode()
     this->_tokenRepresentationMap[TreeNode::Type::IntegerConst] = "<integer>";
     this->_tokenRepresentationMap[TreeNode::Type::Identifier] = "<identifier>";
     this->_tokenRepresentationMap[TreeNode::Type::String] = "<string>";
+    this->_tokenRepresentationMap[TreeNode::Type::Char] = "<char>";
     this->_tokenRepresentationMap[TreeNode::Type::CaseClause] = "case_clause";
     this->_tokenRepresentationMap[TreeNode::Type::Ellipses] = "..";
     this->_tokenRepresentationMap[TreeNode::Type::Otherwise] = "otherwise";

@@ -41,6 +41,7 @@ public:
     Identifier,
     IdentifierValue,
     String,
+    Char,
     CaseClause,
     Ellipses,
     Otherwise,

@@ -99,21 +99,24 @@ TreeNode TinyParser::Const()
 TreeNode TinyParser::ConstValue()
 {
   TreeNode node = TreeNode();
-  node.type = TreeNode::Type::Const;
 
   switch (this->tokens->front())
   {
   case (TinyLexicalAnalyzer::Token::Number):
+    node.type = TreeNode::Type::IntegerConst;
     assertNextToken(TinyLexicalAnalyzer::Token::Number);
-    break;
+    node.children.push_back(ValueNode());
+    return node;
   case (TinyLexicalAnalyzer::Token::Character):
+    node.type = TreeNode::Type::Char;
     assertNextToken(TinyLexicalAnalyzer::Token::Character);
-    break;
+    node.children.push_back(ValueNode());
+    return node;
   default:
-    node.children.push_back(Name());
+    break;
   }
 
-  return node;
+  return Name();
 };
 
 TreeNode TinyParser::Types()
@@ -278,6 +281,7 @@ TreeNode TinyParser::Body()
 TreeNode TinyParser::Statement()
 {
   TreeNode node = TreeNode();
+  TreeNode tmp = TreeNode();
 
   switch (this->tokens->front())
   {
@@ -358,7 +362,14 @@ TreeNode TinyParser::Statement()
     assertNextToken(TinyLexicalAnalyzer::Token::Case);
     node.children.push_back(Expression());
     assertNextToken(TinyLexicalAnalyzer::Token::Of);
-    node.children.push_back(CaseClauses());
+
+    tmp = CaseClauses();
+
+    for (auto child : tmp.children)
+    {
+      node.children.push_back(child);
+    }
+
     if (this->tokens->front() == TinyLexicalAnalyzer::Token::Otherwise)
     {
       node.children.push_back(OtherwiseClause());
@@ -704,7 +715,10 @@ TreeNode TinyParser::Primary()
 
     return node;
   case (TinyLexicalAnalyzer::Token::Character):
+    node.type = TreeNode::Type::Char;
+
     assertNextToken(TinyLexicalAnalyzer::Token::Character);
+    node.children.push_back(ValueNode());
     break;
   case (TinyLexicalAnalyzer::Token::OpenBracket):
     assertNextToken(TinyLexicalAnalyzer::Token::OpenBracket);

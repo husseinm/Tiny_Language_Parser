@@ -212,7 +212,8 @@ void TinyLexicalAnalyzer::analyzeProgram(std::istream &tinyProgram)
         tinyProgram.seekg(initialLocation);
       }
 
-      if (nextChar == EOF) {
+      if (nextChar == EOF)
+      {
         return;
       }
 
@@ -241,11 +242,11 @@ bool TinyLexicalAnalyzer::handleCharsAndStrings(std::istream &tinyProgram, char 
 
     if (textBuffer == "\'")
     {
-      this->_valuesMap[_tokens.size() - 1] = "";
+      this->_valuesMap[_tokens.size() - 1] = "\'\'";
       return true;
     }
     else
-      this->_valuesMap[_tokens.size() - 1] = std::string(textBuffer.begin(), textBuffer.end());
+      this->_valuesMap[_tokens.size() - 1] = "\'" + std::string(textBuffer.begin(), textBuffer.end()) + "\'";
 
     if (nextChar != '\'')
     {
@@ -301,7 +302,8 @@ bool TinyLexicalAnalyzer::handleKeywords(std::istream &tinyProgram, char nextCha
 
   while (textBuffer.length() > 0)
   {
-    if (textBuffer.at(0) == EOF) {
+    if (textBuffer.at(0) == EOF)
+    {
       return false;
     }
 
@@ -309,11 +311,13 @@ bool TinyLexicalAnalyzer::handleKeywords(std::istream &tinyProgram, char nextCha
     {
       Token token = convertStringToToken(textBuffer);
 
-      if (this->_isTokenTerminal[token]) {
+      if (this->_isTokenTerminal[token])
+      {
         char tempCheck = tinyProgram.get();
         tinyProgram.unget();
 
-        if (isalpha(tempCheck)) {
+        if (isalpha(tempCheck))
+        {
           throw std::out_of_range("Token is part of a larger word");
         }
       }
