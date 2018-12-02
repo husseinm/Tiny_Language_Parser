@@ -4,7 +4,7 @@ This was one of the last projects I had for one of my two compilers classes that
 
 The other project was to write a Constrainer and Code Generator for this same language that outputs Bytecode for the professors VM, but since the professor wrote the VM and that is a major part of the code I won't publish that.
 
-The project was to Lexically Analyze & to Parse a subset of C call Subc/Tiny. It was supposed to be a semester long project, but college me felt confident it could be done in 4 days, I only worked on it for 3. Check the history for proof. 😉😅
+The project was to Lexically Analyze & to Parse a subset of C call Subc/Tiny. It was supposed to be a semester long project, but college me felt confident it could be done in 5 days, I only worked on it for 4. Check the history for proof. 😉😅
 
 ## Build/Install
 
