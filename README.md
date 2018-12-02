@@ -11,8 +11,8 @@ The project was to Lexically Analyze & to Parse a subset of C call Subc/Tiny. It
 The application is standalone, it only runs off of the C++11 Standard Libraries. It simply needs to be compiled with g++ 4.8+ using the included Makefile in the root project directory, example:
 
 ```shell
-git clone ...
-cd ./...
+git clone git@github.com:husseinm/Tiny_Language_Parser.git
+cd ./Tiny_Language_Parser
 make
 ```
 
